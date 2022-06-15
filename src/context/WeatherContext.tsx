@@ -1,39 +1,52 @@
-import React, { createContext, Dispatch, SetStateAction, useState } from 'react';
+import React, { createContext, Dispatch, SetStateAction, useState, useEffect } from 'react';
+import { WeatherData } from '../types';
+import { fetchWeather } from '../utils/fetchData';
 
 interface WeatherProviderInterface {
-  weatherData: string[];
   children: React.ReactNode;
 }
 
+export interface Region {
+  city: string;
+}
+
 interface WeatherContextInterface {
-  weather: string[];
-  city: {};
-  setWeather: Dispatch<SetStateAction<string[]>>;
-  setCity: Dispatch<SetStateAction<{city: string, country: string}>>;
+  weather?: WeatherData;
+  region: Region;
+  setWeather: Dispatch<SetStateAction<WeatherData | undefined>>;
+  setRegion: Dispatch<SetStateAction<Region>>;
 }
 
 export const WeatherContext = createContext<WeatherContextInterface>({
-  weather: [],
-  city: {},
+  region: {
+    city: "",
+  },
   setWeather: () => {
     //do nothing
   },
-  setCity: () => {
+  setRegion: () => {
     // do noting
   },
 });
 
 export const WeatherProvider: React.FC<WeatherProviderInterface> = ({
-  weatherData,
   children,
 }) => {
-  const [weather, setWeather] = useState(weatherData);
-  const [city, setCity] = useState({
-    city: "",
-    country: "",
-  })
+  const [region, setRegion] = useState({
+    city: "London",
+  });
+  const [weather, setWeather] = useState<WeatherData>();
+  const [error, setError] = useState(null);
 
-  const value = { weather, city, setWeather, setCity };
+  useEffect(() => {
+    fetchWeather(region)
+      .then(data => {
+        setWeather(data);
+      })
+      .catch(error => setError(error.message));
+  }, [region])
+
+  const value = { weather, region, error, setWeather, setRegion };
   return (
     <WeatherContext.Provider value={value}>
       {children}
