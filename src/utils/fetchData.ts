@@ -1,7 +1,7 @@
 import { Region } from "../context/WeatherContext";
 import { WeatherData } from "../types";
 
-const APIKEY = "1e6cead52739de7e4cc339c90eb9c30a";
+const APIKEY = process.env.REACT_APP_API;
 export const fetchWeather = async (region: Region) => {
   const { city } = region;
 
